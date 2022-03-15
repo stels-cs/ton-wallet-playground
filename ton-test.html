@@ -43,8 +43,13 @@
                 }
 
                 var tx2 = {
-                    to:'EQB5HQfj_BAD_ADDRESS_U2e4O6_d2j',
+                    to:'BAD_ADDRESS',
                     value: 10000000
+                }
+
+                var tx3 = {
+                    to:'EQB5HQfjevz9su4ZQGcDT_4IB0IUGh5PM2vAXPU2e4O6_d2j',
+                    value: 10000000000000
                 }
             </script>
             <div class="p-1">
@@ -56,6 +61,11 @@
                 <button onclick="tonX(this,'ton_sendTransaction', [tx2])"
                         type="button"
                         class="btn btn-outline-secondary">ton_sendTransaction bad args</button>
+            </div>
+            <div class="p-1">
+                <button onclick="tonX(this,'ton_sendTransaction', [tx3])"
+                        type="button"
+                        class="btn btn-outline-secondary">ton_sendTransaction big amount</button>
             </div>
         </div>
     </div>
