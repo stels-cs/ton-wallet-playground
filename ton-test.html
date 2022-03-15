@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TON Wallet test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <span class="fs-4">TON Wallet test</span>
+        </a>
+    </header>
+</div>
+<div class="container">
+    <div class="row gx-5">
+        <div class="col">
+            <h2>Log</h2>
+            <pre id="console"></pre>
+        </div>
+        <div class="col">
+            <div class="p-1">
+                <button onclick="tonX(this,'ton_requestAccounts', [])"
+                        type="button"
+                        class="btn btn-outline-secondary">ton_requestAccounts</button>
+            </div>
+            <div class="p-1">
+                <button onclick="tonX(this,'ton_requestWallets', [])"
+                        type="button"
+                        class="btn btn-outline-secondary">ton_requestWallets</button>
+            </div>
+            <div class="p-1">
+                <button onclick="tonX(this,'ton_getBalance', [])"
+                        type="button"
+                        class="btn btn-outline-secondary">ton_requestWallets</button>
+            </div>
+            <script>
+                var tx1 = {
+                    to:'EQB5HQfjevz9su4ZQGcDT_4IB0IUGh5PM2vAXPU2e4O6_d2j',
+                    value: 10000000
+                }
+
+                var tx2 = {
+                    to:'EQB5HQfj_BAD_ADDRESS_U2e4O6_d2j',
+                    value: 10000000
+                }
+            </script>
+            <div class="p-1">
+                <button onclick="tonX(this,'ton_sendTransaction', [tx1])"
+                        type="button"
+                        class="btn btn-outline-secondary">ton_sendTransaction 1</button>
+            </div>
+            <div class="p-1">
+                <button onclick="tonX(this,'ton_sendTransaction', [tx2])"
+                        type="button"
+                        class="btn btn-outline-secondary">ton_sendTransaction bad args</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+    function log(msg, ...any) {
+        console.log(msg, ...any);
+        const c = document.getElementById('console');
+        const now = (new Date()).toISOString();
+        let args = ''
+        if (any.length !== 0) {
+            args = any.map(x => {
+                return JSON.stringify(any, null, 2)
+            }).join("\n")
+        }
+        c.prepend(document.createTextNode(now.split('T')[1].replace('Z', '') + ": " + msg + " " + args + "\n"));
+    }
+
+    log("Init");
+
+    async function tonWait() {
+        const ton = window.ton
+        if (ton) {
+            return ton;
+        }
+        return new Promise((resolve, reject) => {
+            window.addEventListener('tonready', () => {
+                if (window.ton) {
+                    resolve(window.ton);
+                } else {
+                    reject(new Error('tonready fire but no window.ton'))
+                }
+            })
+        })
+    }
+
+
+    async function tonCall(method, args) {
+        const start = Date.now();
+        try {
+            const ton = await tonWait();
+            log(`[call ${method}]`, args);
+            const res = await ton.send(method, args)
+            log(`[ok ${method}]`, res);
+        } catch (e) {
+            log(`[fail ${method}]`, e);
+        }
+        const duration = Date.now() - start;
+        log(`[duration] ${new Intl.NumberFormat().format(duration)} ms`,)
+    }
+
+
+    /**
+     *
+     * @param {HTMLButtonElement} node
+     * @param {string} cmd
+     * @param {any[]} args
+     */
+    function tonX(node, cmd, args) {
+        node.setAttribute("disabled", "disabled")
+        tonCall(cmd, args).finally(() => {
+            node.removeAttribute("disabled")
+        })
+    }
+
+    if (!!window.ton) {
+        log('Ton ready')
+    } else {
+        log('Wait tonready')
+        window.addEventListener('tonready', () => {
+            log('Ton ready')
+        })
+    }
+
+</script>
+</body>
+</html>
